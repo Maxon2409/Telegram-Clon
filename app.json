@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Telegram Clon",
+    "slug": "telegram-clon",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "scheme": "telegram-clon",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.telegramclon.app"
+    },
+    "android": {
+      "package": "com.telegramclon.app"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-asset"
+    ]
+  }
+}
