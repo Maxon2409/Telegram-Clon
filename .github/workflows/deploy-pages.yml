@@ -31,9 +31,17 @@ jobs:
           EXPO_NO_TELEMETRY: 1
         run: npm run build:web
 
+      - name: List build output
+        run: |
+          echo "=== Contents of dist ==="
+          ls -la dist || true
+          test -f dist/index.html || (echo "ERROR: dist/index.html not found" && exit 1)
+
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           force_orphan: true
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
