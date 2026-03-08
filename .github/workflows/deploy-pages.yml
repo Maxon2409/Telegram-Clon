@@ -37,6 +37,9 @@ jobs:
           ls -la dist || true
           test -f dist/index.html || (echo "ERROR: dist/index.html not found" && exit 1)
 
+      - name: Add .nojekyll for GitHub Pages
+        run: touch dist/.nojekyll
+
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:

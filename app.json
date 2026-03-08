@@ -3,7 +3,7 @@
     "name": "Telegram Clon",
     "slug": "telegram-clon",
     "experiments": {
-      "baseUrl": "/Telegram-Clon/"
+      "baseUrl": "/Telegram-Clon"
     },
     "version": "1.0.0",
     "orientation": "portrait",

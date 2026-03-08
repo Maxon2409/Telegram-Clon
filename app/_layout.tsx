@@ -1,10 +1,12 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
       <StatusBar style="light" />
       <Stack
         screenOptions={{
@@ -24,6 +26,7 @@ export default function RootLayout() {
           })}
         />
       </Stack>
-    </AuthProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
