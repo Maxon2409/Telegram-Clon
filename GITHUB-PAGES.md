@@ -49,8 +49,10 @@ GitHub попросит логин и пароль. Пароль — это **Pe
 1. Открой свой репозиторий на GitHub.
 2. Вкладка **Settings** → слева **Pages**.
 3. В блоке **Build and deployment**:
-   - **Source:** выбери **GitHub Actions** (не Branch).
-4. Сохрани, если что-то менял.
+   - **Source:** выбери **Deploy from a branch**.
+   - **Branch:** выбери **gh-pages** (появится после первого успешного деплоя).
+   - **Folder:** оставь **/ (root)**.
+4. Нажми **Save**.
 
 ---
 
