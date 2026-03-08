@@ -40,6 +40,16 @@ jobs:
       - name: Add .nojekyll for GitHub Pages
         run: touch dist/.nojekyll
 
+      - name: Fix base path for GitHub Pages subpath
+        run: |
+          sed -i 's|<head>|<head><base href="/Telegram-Clon/">|' dist/index.html
+          sed -i 's|src="/_expo|src="/Telegram-Clon/_expo|g' dist/index.html
+          sed -i 's|href="/_expo|href="/Telegram-Clon/_expo|g' dist/index.html
+          sed -i 's|src="/assets|src="/Telegram-Clon/assets|g' dist/index.html
+          sed -i 's|href="/assets|href="/Telegram-Clon/assets|g' dist/index.html
+          find dist -name "*.js" -exec sed -i 's|"/_expo/|"/Telegram-Clon/_expo/|g' {} \;
+          find dist -name "*.js" -exec sed -i 's|"/assets/|"/Telegram-Clon/assets/|g' {} \;
+
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
