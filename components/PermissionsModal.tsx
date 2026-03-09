@@ -29,8 +29,10 @@ interface PermissionsModalProps {
 export function PermissionsModal({ visible, onClose }: PermissionsModalProps) {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<PermissionResult[] | null>(null);
+  const [agreed, setAgreed] = useState(false);
 
   const handleAllow = async () => {
+    if (!agreed) return;
     setLoading(true);
     setResults(null);
     try {
@@ -49,6 +51,13 @@ export function PermissionsModal({ visible, onClose }: PermissionsModalProps) {
 
   const handleSkip = async () => {
     await AsyncStorage.setItem(PERMISSIONS_ASKED_KEY, 'true');
+    setAgreed(false);
+    onClose();
+  };
+
+  const handleClose = () => {
+    setAgreed(false);
+    setResults(null);
     onClose();
   };
 
@@ -70,11 +79,25 @@ export function PermissionsModal({ visible, onClose }: PermissionsModalProps) {
           </Text>
 
           {!results ? (
-            <View style={styles.list}>
-              <Row icon="camera-outline" label={permissionLabels.camera} />
-              <Row icon="mic-outline" label={permissionLabels.microphone} />
-              <Row icon="people-outline" label={permissionLabels.contacts} />
-            </View>
+            <>
+              <View style={styles.list}>
+                <Row icon="camera-outline" label={permissionLabels.camera} />
+                <Row icon="mic-outline" label={permissionLabels.microphone} />
+                <Row icon="people-outline" label={permissionLabels.contacts} />
+              </View>
+              <TouchableOpacity
+                style={styles.checkboxRow}
+                onPress={() => setAgreed(!agreed)}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.checkbox, agreed && styles.checkboxChecked]}>
+                  {agreed && <Ionicons name="checkmark" size={16} color="#fff" />}
+                </View>
+                <Text style={styles.checkboxLabel}>
+                  Я согласен с предоставлением доступа к камере, микрофону и контактам
+                </Text>
+              </TouchableOpacity>
+            </>
           ) : (
             <ScrollView style={styles.results} contentContainerStyle={styles.resultsContent}>
               {results.map((r) => (
@@ -97,7 +120,12 @@ export function PermissionsModal({ visible, onClose }: PermissionsModalProps) {
             <ActivityIndicator size="large" color="#0088CC" style={styles.loader} />
           ) : !results ? (
             <View style={styles.buttons}>
-              <TouchableOpacity style={styles.allowButton} onPress={handleAllow} activeOpacity={0.8}>
+              <TouchableOpacity
+                style={[styles.allowButton, !agreed && styles.allowButtonDisabled]}
+                onPress={handleAllow}
+                activeOpacity={0.8}
+                disabled={!agreed}
+              >
                 <Text style={styles.allowButtonText}>Разрешить</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.skipButton} onPress={handleSkip} activeOpacity={0.8}>
@@ -105,7 +133,7 @@ export function PermissionsModal({ visible, onClose }: PermissionsModalProps) {
               </TouchableOpacity>
             </View>
           ) : (
-            <TouchableOpacity style={styles.doneButton} onPress={onClose} activeOpacity={0.8}>
+            <TouchableOpacity style={styles.doneButton} onPress={handleClose} activeOpacity={0.8}>
               <Text style={styles.doneButtonText}>Готово</Text>
             </TouchableOpacity>
           )}
@@ -158,7 +186,35 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   list: {
+    marginBottom: 16,
+  },
+  checkboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 24,
+    gap: 12,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#0088CC',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxChecked: {
+    backgroundColor: '#0088CC',
+    borderColor: '#0088CC',
+  },
+  checkboxLabel: {
+    flex: 1,
+    fontSize: 14,
+    color: '#3C3C43',
+    lineHeight: 20,
+  },
+  allowButtonDisabled: {
+    opacity: 0.5,
   },
   row: {
     flexDirection: 'row',

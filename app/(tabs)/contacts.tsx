@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,24 +6,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   TextInput,
+  ActivityIndicator,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { loadDeviceContacts, type AppContact } from '@/services/contactsService';
 
-interface Contact {
-  id: string;
-  name: string;
-  phone?: string;
-}
-
-const mockContacts: Contact[] = [
-  { id: '1', name: 'Мама', phone: '+7 999 123-45-67' },
-  { id: '2', name: 'Иван Петров', phone: '+7 999 234-56-78' },
-  { id: '3', name: 'Алексей', phone: '+7 999 345-67-89' },
-  { id: '4', name: 'Анна Сидорова', phone: '+7 999 456-78-90' },
-];
-
-function ContactItem({ contact }: { contact: Contact }) {
+function ContactItem({ contact }: { contact: AppContact }) {
   const router = useRouter();
   const initials = contact.name
     .split(' ')
@@ -35,7 +24,7 @@ function ContactItem({ contact }: { contact: Contact }) {
   return (
     <TouchableOpacity
       style={styles.contactItem}
-      onPress={() => router.push(`/chat/${contact.id}`)}
+      onPress={() => router.push({ pathname: `/chat/${contact.id}`, params: { name: contact.name } })}
       activeOpacity={0.7}
     >
       <View style={styles.avatar}>
@@ -54,9 +43,57 @@ function ContactItem({ contact }: { contact: Contact }) {
 
 export default function ContactsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
-  const filteredContacts = mockContacts.filter((contact) =>
-    contact.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const [contacts, setContacts] = useState<AppContact[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const loadContacts = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await loadDeviceContacts();
+      setContacts(data);
+    } catch (e) {
+      setError('Не удалось загрузить контакты');
+      setContacts([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadContacts();
+      return () => {};
+    }, [loadContacts])
   );
+
+  const filteredContacts = contacts.filter((contact) =>
+    contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (contact.phone ?? '').includes(searchQuery.replace(/\D/g, ''))
+  );
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color="#0088CC" />
+        <Text style={styles.loadingText}>Загрузка контактов...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.container, styles.centered]}>
+        <Ionicons name="alert-circle-outline" size={48} color="#FF3B30" />
+        <Text style={styles.errorText}>{error}</Text>
+        <Text style={styles.errorHint}>Разрешите доступ к контактам в настройках приложения</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={loadContacts}>
+          <Text style={styles.retryButtonText}>Повторить</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -77,6 +114,16 @@ export default function ContactsScreen() {
         renderItem={({ item }) => <ContactItem contact={item} />}
         contentContainerStyle={styles.listContent}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Ionicons name="people-outline" size={64} color="#C7C7CC" />
+            <Text style={styles.emptyText}>
+              {contacts.length === 0
+                ? 'Нет контактов или доступ запрещён'
+                : 'Контакты не найдены'}
+            </Text>
+          </View>
+        }
       />
     </View>
   );
@@ -142,5 +189,52 @@ const styles = StyleSheet.create({
     height: StyleSheet.hairlineWidth,
     backgroundColor: '#C6C6C8',
     marginLeft: 74,
+  },
+  centered: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#8E8E93',
+  },
+  errorText: {
+    marginTop: 16,
+    fontSize: 17,
+    fontWeight: '600',
+    color: '#000',
+    textAlign: 'center',
+  },
+  errorHint: {
+    marginTop: 8,
+    fontSize: 15,
+    color: '#8E8E93',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  retryButton: {
+    backgroundColor: '#0088CC',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 80,
+  },
+  emptyText: {
+    fontSize: 17,
+    color: '#8E8E93',
+    marginTop: 16,
+    textAlign: 'center',
   },
 });

@@ -40,14 +40,14 @@ function MessageBubble({ message }: { message: Message }) {
 }
 
 export default function ChatScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, name } = useLocalSearchParams<{ id: string; name?: string }>();
   const router = useRouter();
   const [inputText, setInputText] = useState('');
 
   const chat = mockChats.find((c) => c.id === id);
   const messages = (id && mockMessages[id]) || [];
 
-  const chatName = chat?.name ?? 'Чат';
+  const chatName = chat?.name ?? name ?? 'Чат';
 
   const sendMessage = () => {
     if (!inputText.trim()) return;
