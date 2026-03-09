@@ -31,7 +31,15 @@ const settingsSections: SettingsItem[][] = [
   ],
 ];
 
-function SettingsSection({ items, onLogout }: { items: SettingsItem[]; onLogout?: () => void }) {
+function SettingsSection({
+  items,
+  onItemPress,
+  onLogout,
+}: {
+  items: SettingsItem[];
+  onItemPress: (id: string) => void;
+  onLogout?: () => void;
+}) {
   return (
     <View style={styles.section}>
       {items.map((item) => (
@@ -39,7 +47,11 @@ function SettingsSection({ items, onLogout }: { items: SettingsItem[]; onLogout?
           key={item.id}
           style={[styles.settingItem, item.id === '10' && styles.logoutItem]}
           activeOpacity={0.7}
-          onPress={item.id === '10' ? onLogout : undefined}
+          onPress={
+            item.id === '10'
+              ? onLogout
+              : () => onItemPress(item.id)
+          }
         >
           <View style={styles.settingLeft}>
             <View style={styles.iconContainer}>
@@ -63,7 +75,11 @@ export default function SettingsScreen() {
   const { user, logout } = useAuth();
   const router = useRouter();
 
-  const handleLogout = async () => {
+  const handleItemPress = (id: string) => {
+    router.push(`/(tabs)/settings/${id}`);
+  };
+
+  const handleLogout = () => {
     Alert.alert(
       'Выйти из аккаунта',
       'Вы уверены?',
@@ -103,6 +119,7 @@ export default function SettingsScreen() {
         <SettingsSection
           key={index}
           items={section}
+          onItemPress={handleItemPress}
           onLogout={section.some((i) => i.id === '10') ? handleLogout : undefined}
         />
       ))}

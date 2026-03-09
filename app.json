@@ -21,7 +21,21 @@
     },
     "plugins": [
       "expo-router",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Приложению нужен доступ к камере для видеозвонков и фото.",
+          "microphonePermission": "Приложению нужен доступ к микрофону для голосовых сообщений и звонков.",
+          "recordAudioAndroid": true
+        }
+      ],
+      [
+        "expo-contacts",
+        {
+          "contactsPermission": "Приложению нужен доступ к контактам, чтобы находить друзей в Telegram."
+        }
+      ]
     ]
   }
 }

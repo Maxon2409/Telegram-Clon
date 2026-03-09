@@ -74,7 +74,10 @@ export default function PhoneScreen() {
         </Text>
 
         <View style={styles.inputRow}>
-          <TouchableOpacity style={styles.countryCode}>
+          <TouchableOpacity
+            style={styles.countryCode}
+            onPress={() => Alert.alert('Код страны', 'Выбор страны будет доступен в следующей версии.')}
+          >
             <Text style={styles.countryCodeText}>{countryCode}</Text>
           </TouchableOpacity>
           <TextInput

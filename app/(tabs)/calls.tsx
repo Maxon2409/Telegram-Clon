@@ -1,4 +1,5 @@
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 interface Call {
@@ -15,6 +16,8 @@ const mockCalls: Call[] = [
 ];
 
 function CallItem({ call }: { call: Call }) {
+  const router = useRouter();
+
   const getIcon = () => {
     switch (call.type) {
       case 'outgoing':
@@ -26,8 +29,16 @@ function CallItem({ call }: { call: Call }) {
     }
   };
 
+  const handleRowPress = () => router.push(`/chat/${call.id}`);
+  const handleCallPress = () => {
+    Alert.alert('Звонок', `Соединение с ${call.name}...`, [
+      { text: 'Отмена', style: 'cancel' },
+      { text: 'OK' },
+    ]);
+  };
+
   return (
-    <TouchableOpacity style={styles.callItem} activeOpacity={0.7}>
+    <TouchableOpacity style={styles.callItem} activeOpacity={0.7} onPress={handleRowPress}>
       <View style={[styles.avatar, styles.callAvatar]}>
         <Text style={styles.avatarText}>
           {call.name
@@ -47,7 +58,7 @@ function CallItem({ call }: { call: Call }) {
           <Text style={styles.callTime}>{call.time}</Text>
         </View>
       </View>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={handleCallPress} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
         <Ionicons name="call" size={28} color="#0088CC" />
       </TouchableOpacity>
     </TouchableOpacity>

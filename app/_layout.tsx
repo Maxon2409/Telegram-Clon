@@ -1,12 +1,36 @@
+import { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { PermissionsModal, shouldShowPermissionsDialog } from '@/components/PermissionsModal';
+
+function PermissionsGate() {
+  const { user, isLoading } = useAuth();
+  const [showPermissions, setShowPermissions] = useState(false);
+
+  useEffect(() => {
+    if (isLoading || !user) return;
+    let cancelled = false;
+    shouldShowPermissionsDialog().then((show) => {
+      if (!cancelled && show) setShowPermissions(true);
+    });
+    return () => { cancelled = true; };
+  }, [user, isLoading]);
+
+  return (
+    <PermissionsModal
+      visible={showPermissions}
+      onClose={() => setShowPermissions(false)}
+    />
+  );
+}
 
 export default function RootLayout() {
   return (
     <ErrorBoundary>
       <AuthProvider>
+      <PermissionsGate />
       <StatusBar style="light" />
       <Stack
         screenOptions={{
